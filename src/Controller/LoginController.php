@@ -22,20 +22,29 @@ class LoginController extends AbstractController
         $password = $request->get("password");
 
         $repo = $em->getRepository(User::class);
-        var_dump($repo);
         $user = $repo->findOneByEmail($email);
-        var_dump($user);
-        die();
-        $bdd_password = $user->getPassword();
+
+        if (!$email or !$password) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Il manque des informations'
+            ]);
+        }
 
         if ($user) {
-            if (password_verify($password, $bdd_password)) {
+            if (password_verify($password, $user->getPassword())) {
                 return $this->json([
                     'success' => true,
                     'message' => 'Connecté !'
                 ]);
             }
+        } else {
+            return $this->json([
+                'success' => false,
+                'message' => 'Aucun compte avec cet email'
+            ]);
         }
+
         return $this->json([
             'success' => false,
             'message' => 'Un des champs est incorrect'
