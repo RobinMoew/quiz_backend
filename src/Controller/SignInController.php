@@ -29,6 +29,7 @@ class SignInController extends AbstractController
         if ($user_exist) {
             return $this->json([
                 'success' => false,
+                'redirect' => "login",
                 'message' => 'Cette entrée existe déjà: ' . $email
             ]);
         }
