@@ -16,17 +16,29 @@ class LoginController extends AbstractController
      */
     public function log_in(Request $request)
     {
+        $em = $this->getDoctrine()->getManager();
+
         $email = $request->get("email");
         $password = $request->get("password");
 
-        $em = $this->getDoctrine()->getManager();
-        $user = $em->getRepository(User::class);
-        $bdd_password = $user->findOneByEmail($email)->getPassword();
+        $repo = $em->getRepository(User::class);
+        var_dump($repo);
+        $user = $repo->findOneByEmail($email);
+        var_dump($user);
+        die();
+        $bdd_password = $user->getPassword();
 
         if ($user) {
             if (password_verify($password, $bdd_password)) {
-                return $this->json(['message' => 'Connecté !']);
+                return $this->json([
+                    'success' => true,
+                    'message' => 'Connecté !'
+                ]);
             }
         }
+        return $this->json([
+            'success' => false,
+            'message' => 'Un des champs est incorrect'
+        ]);
     }
 }
