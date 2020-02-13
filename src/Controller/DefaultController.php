@@ -35,6 +35,11 @@ class DefaultController extends AbstractController
      */
     public function index()
     {
+        $file = '../themes.json';
+        $data = file_get_contents($file);
+        $array = explode(',', $data);
+        var_dump($array[2]);
+
         $em = $this->getDoctrine()->getManager();
 
         $theme = new Theme();

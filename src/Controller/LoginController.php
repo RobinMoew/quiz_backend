@@ -41,14 +41,25 @@ class LoginController extends AbstractController
                 $session = new SessionUtility($this->get('session'), $request);
                 $session->set('id', $user->getId());
                 $session->set('email', $user->getEmail());
+                $session->set('isAdmin', $user->getRole());
 
-                return $this->json([
-                    'id' => $user->getId(),
-                    'email' => $user->getEmail(),
-                    'redirect' => "categories",
-                    'message' => 'Connecté !',
-                    "sessionId" => $session->getId()
-                ]);
+                if ($user->getRole() == 'admin') {
+                    return $this->json([
+                        'id' => $user->getId(),
+                        'email' => $user->getEmail(),
+                        'redirect' => "admin",
+                        'message' => 'Connecté !',
+                        "sessionId" => $session->getId()
+                    ]);
+                } else {
+                    return $this->json([
+                        'id' => $user->getId(),
+                        'email' => $user->getEmail(),
+                        'redirect' => "categories",
+                        'message' => 'Connecté !',
+                        "sessionId" => $session->getId()
+                    ]);
+                }
             }
         } else {
             return $this->json([
