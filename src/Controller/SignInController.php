@@ -28,22 +28,18 @@ class SignInController extends AbstractController
 
         if ($user_exist) {
             return $this->json([
-                'success' => false,
-                'redirect' => "login",
                 'message' => 'Cette entrée existe déjà: ' . $email
             ]);
         }
 
         if (!$email or !$password or !$c_password) {
             return $this->json([
-                'success' => false,
                 'message' => 'Il manque des informations'
             ]);
         }
 
         if ($password != $c_password) {
             return $this->json([
-                'success' => false,
                 'message' => 'Mot de passe différents!'
             ]);
         }
@@ -56,7 +52,7 @@ class SignInController extends AbstractController
         $em->flush();
 
         return $this->json([
-            'success' => true,
+            'redirect' => "login",
             'message' => 'Inscrit !'
         ]);
     }

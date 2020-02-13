@@ -5,9 +5,13 @@ namespace App\Controller;
 header('Access-Control-Allow-Origin: *');
 
 use App\Entity\User;
+use App\Services\SessionUtility;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 class LoginController extends AbstractController
 {
@@ -16,6 +20,8 @@ class LoginController extends AbstractController
      */
     public function log_in(Request $request)
     {
+
+
         $em = $this->getDoctrine()->getManager();
 
         $email = $request->get("email");
@@ -26,27 +32,31 @@ class LoginController extends AbstractController
 
         if (!$email or !$password) {
             return $this->json([
-                'success' => false,
                 'message' => 'Il manque des informations'
             ]);
         }
 
         if ($user) {
             if (password_verify($password, $user->getPassword())) {
+                $session = new SessionUtility($this->get('session'), $request);
+                $session->set('id', $user->getId());
+                $session->set('email', $user->getEmail());
+
                 return $this->json([
-                    'success' => true,
-                    'message' => 'Connecté !'
+                    'id' => $user->getId(),
+                    'email' => $user->getEmail(),
+                    'redirect' => "categories",
+                    'message' => 'Connecté !',
+                    "sessionId" => $session->getId()
                 ]);
             }
         } else {
             return $this->json([
-                'success' => false,
                 'message' => 'Aucun compte avec cet email'
             ]);
         }
 
         return $this->json([
-            'success' => false,
             'message' => 'Un des champs est incorrect'
         ]);
     }
