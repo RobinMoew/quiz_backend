@@ -2,16 +2,51 @@
 
 namespace App\Controller;
 
+header('Access-Control-Allow-Origin: *');
+
 use App\Entity\Answer;
 use App\Entity\Batch;
 use App\Entity\Question;
 use App\Entity\Theme;
+use mysqli;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class DefaultController extends AbstractController
 {
+    /**
+     * @Route("/getThemes", name="getThemes")
+     */
+    public function getThemes()
+    {
+        $co = new mysqli('localhost', 'root', 'root', 'quiz');
+        $sql = $co->prepare('SELECT * FROM theme');
+        $sql->execute();
+        $sql->bind_result($bdd_id, $bdd_desc, $bdd_title);
+
+        $output = [];
+
+        while ($sql->fetch()) {
+            $output[] = [
+                'id' => $bdd_id,
+                'title' => $bdd_title,
+                'description' => $bdd_desc
+            ];
+        }
+
+        $sql->close();
+        $co->close();
+
+        return $this->json($output);
+
+        // $em = $this->getDoctrine()->getManager();
+        // $repository_theme = $em->getRepository(Theme::class);
+
+        // $themes = $repository_theme->findAll();
+
+        // return $this->json(['themes' => $themes]);
+    }
 
     /**
      * @Route("/getThemeInfos", name="getThemeInfos")
@@ -72,7 +107,7 @@ class DefaultController extends AbstractController
                     $b->addAnswer($r);
                 }
                 $bonneReponse = htmlspecialchars($questionObj["ga"]);
-                
+
                 $ga = new Answer();
                 $ga->setAnswer($bonneReponse);
                 $em->persist($ga);
