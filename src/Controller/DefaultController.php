@@ -35,54 +35,55 @@ class DefaultController extends AbstractController
      */
     public function index()
     {
-        $file = '../themes.json';
-        $data = file_get_contents($file);
-        $array = explode(',', $data);
-        var_dump($array[2]);
-
         $em = $this->getDoctrine()->getManager();
 
-        $theme = new Theme();
-        $theme->setTitle("CSS");
-        $theme->setDescription("Quizz sur le cascading style sheet !");
+        $file = file_get_contents('../themes.json');
+        $data = json_decode($file);
 
-        $em->persist($theme);
+        foreach ($data as $theme) {
+            $title = $theme->title;
+            $description = $theme->description;
 
-        $r1 = new Answer();
-        $r1->setAnswer("Cascading Style Sheet !");
-        $em->persist($r1);
+            $t = new Theme();
+            $t->setTitle($title);
+            $t->setDescription($description);
 
-        $r2 = new Answer();
-        $r2->setAnswer("Cacading Style Sheet !");
-        $em->persist($r2);
+            $em->persist($t);
 
-        $r3 = new Answer();
-        $r3->setAnswer("Cascading Steel Sheet !");
-        $em->persist($r3);
+            foreach ($theme->questions as $question) {
+                $questionObj = (array) $question;
+                $intitule = $questionObj['question'];
 
-        $r4 = new Answer();
-        $r4->setAnswer("Cascading Style Shit !");
-        $em->persist($r4);
+                $b = new Batch();
+                $q = new Question();
+                $q->setTheme($t);
+                $q->setQuestion($intitule);
+                $q->addBatch($b);
 
-        $b = new Batch();
-        $b->setGoodAnswer($r1);
-        $b->addAnswer($r1);
-        $b->addAnswer($r2);
-        $b->addAnswer($r3);
-        $b->addAnswer($r4);
+                $em->persist($q);
 
-        $em->persist($b);
+                for ($i = 1; $i < 5; $i++) {
+                    $reponseCourante = htmlspecialchars($questionObj["a" . $i]);
 
-        $q = new Question();
-        $q->setTheme($theme);
-        $q->setQuestion("Que veut dire CSS ?");
-        $q->addBatch($b);
+                    $r = new Answer();
+                    $r->setAnswer($reponseCourante);
+                    $em->persist($r);
 
-        $em->persist($q);
+                    $b->addAnswer($r);
+                }
+                $bonneReponse = htmlspecialchars($questionObj["ga"]);
+                
+                $ga = new Answer();
+                $ga->setAnswer($bonneReponse);
+                $em->persist($ga);
 
-        $em->flush();
+                $b->setGoodAnswer($ga);
+                $em->persist($b);
+            }
 
+            $em->flush();
+        }
 
-        return $this->json("coucou");
+        return $this->json("Added to database");
     }
 }
