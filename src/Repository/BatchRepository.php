@@ -19,6 +19,15 @@ class BatchRepository extends ServiceEntityRepository
         parent::__construct($registry, Batch::class);
     }
 
+    public function getGoodAnswersByTheme($theme)
+    {
+        // Get all good answers:
+        // SELECT * FROM batch, answer WHERE batch.good_answer_id = answer.id
+        $id = $theme->getId();
+
+        return $this->createQueryBuilder('ga');
+    }
+
     // /**
     //  * @return Batch[] Returns an array of Batch objects
     //  */

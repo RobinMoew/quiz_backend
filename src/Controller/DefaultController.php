@@ -16,36 +16,43 @@ use Symfony\Component\Routing\Annotation\Route;
 class DefaultController extends AbstractController
 {
     /**
-     * @Route("/getThemes", name="getThemes")
+     * @Route("/getThemes", name="getTheme")
      */
     public function getThemes()
     {
-        $co = new mysqli('localhost', 'root', 'root', 'quiz');
-        $sql = $co->prepare('SELECT * FROM theme');
-        $sql->execute();
-        $sql->bind_result($bdd_id, $bdd_desc, $bdd_title);
+        // $co = new mysqli('localhost', 'root', 'root', 'quiz');
+        // $sql = $co->prepare('SELECT * FROM theme');
+        // $sql->execute();
+        // $sql->bind_result($bdd_id, $bdd_desc, $bdd_title);
 
-        $output = [];
+        // $output = [];
 
-        while ($sql->fetch()) {
-            $output[] = [
-                'id' => $bdd_id,
-                'title' => $bdd_title,
-                'description' => $bdd_desc
-            ];
+        // while ($sql->fetch()) {
+        //     $output[] = [
+        //         'id' => $bdd_id,
+        //         'title' => $bdd_title,
+        //         'description' => $bdd_desc
+        //     ];
+        // }
+
+        // $sql->close();
+        // $co->close();
+
+        // return $this->json($output);
+
+        $em = $this->getDoctrine()->getManager();
+        $repository_theme = $em->getRepository(Theme::class);
+        $repository_question = $em->getRepository(Question::class);
+
+        $themes = $repository_theme->findAll();
+
+        $data = [];
+        foreach ($themes as $theme) {
+            $questions = $repository_question->getQuestionsByTheme($theme);
+            $data[] = $theme->toString($questions);
         }
 
-        $sql->close();
-        $co->close();
-
-        return $this->json($output);
-
-        // $em = $this->getDoctrine()->getManager();
-        // $repository_theme = $em->getRepository(Theme::class);
-
-        // $themes = $repository_theme->findAll();
-
-        // return $this->json(['themes' => $themes]);
+        return $this->json(['themes' => $data]);
     }
 
     /**

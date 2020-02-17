@@ -33,20 +33,28 @@ class Theme
      */
     private $title;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $image;
+
     public function toString($questions)
     {
         $data = [
+            "id" => $this->getId(),
             "title" => $this->getTitle(),
-            "description" => $this->getDescription()
+            "image" => $this->getImage(),
+            "description" => $this->getDescription(),
+            "questions" => count($questions)
         ];
 
         foreach ($questions as $keyQ => $question) {
             $data[$keyQ]["question"] = $question->getQuestion();
             foreach ($question->getBatches() as $keyB => $batch) {
                 foreach ($batch->getAnswers() as $keyA => $answer) {
-                    $data[$keyQ]["responses"][$keyA] = $answer->getAnswer();
-                    if ($batch->getGoodAnswer() == $answer) {
-                        $data[$keyQ]["goodAnswer"] = $keyA;
+                    $data[$keyQ]["responses"][$keyA] = htmlspecialchars_decode($answer->getAnswer());
+                    if ($batch->getGoodAnswer()) {
+                        $data[$keyQ]["goodAnswer"] = $batch->getGoodAnswer()->getAnswer();
                     }
                 }
             }
@@ -116,6 +124,18 @@ class Theme
     public function setTitle(string $title): self
     {
         $this->title = $title;
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
 
         return $this;
     }
